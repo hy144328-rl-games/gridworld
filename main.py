@@ -2,6 +2,7 @@
 
 import abc
 import enum
+import numpy as np
 import random
 import typing
 
@@ -100,7 +101,11 @@ class Game(abc.ABC):
         no_iterations: int = 50,
         no_samples: int = 1,
     ):
+        res = []
+
         for sample_ct in range(no_samples):
+            random.seed(sample_ct)
+
             s = initial_state
             discount = 1.0
             val = 0.0
@@ -114,7 +119,9 @@ class Game(abc.ABC):
                 s = self.transition(grid, s, a)
                 discount *= gamma
 
-            return val
+            res.append(val)
+
+        return np.mean(res)
 
 class RewardSpecialCase(typing.NamedTuple):
     state: State
@@ -181,6 +188,7 @@ if __name__ == "__main__":
             for action_it in Action
         ],
     )
-    res = game.play(grid, State(0, 0))
-    print(res)
+
+    val = game.play(grid, State(0, 0), no_iterations=100, no_samples=1000)
+    print(val)
 
