@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 
+import abc
 import enum
+import random
 import typing
 
 class Action(enum.Enum):
@@ -77,50 +79,108 @@ class Grid:
 
         return res
 
-g: Grid = Grid(5, 5)
-A: State = State(0, 1)
-A_prime: State = State(4, 1)
-B: State = State(0, 3)
-B_prime: State = State(2, 3)
+class Game(abc.ABC):
+    @abc.abstractmethod
+    def reward(self, g: Grid, s: State, a: Action) -> float:
+        ...
 
-def reward(g: Grid, s: State, a: Action) -> float:
-    if s == A:
-        return 10
-    elif s == B:
-        return 5
-    elif g.off_border(s, a):
-        return -1
-    else:
-        return 0
+    @abc.abstractmethod
+    def policy(self, g: Grid, s: State, a: Action) -> float:
+        ...
 
-def policy(g: Grid, s: State, a: Action) -> float:
-    return 0.25
+    @abc.abstractmethod
+    def transition(self, g: Grid, s: State, a: Action) -> float:
+        ...
 
-def transition(g: Grid, s: State, a: Action) -> State:
-    if s == A:
-        return A_prime
-    elif s == B:
-        return B_prime
-    elif g.off_border(s, a):
-        return s
-    else:
-        return s + a
+    def play(
+        self,
+        grid: Grid,
+        initial_state: State,
+        gamma: float = 0.9,
+        no_iterations: int = 50,
+        no_samples: int = 1,
+    ):
+        for sample_ct in range(no_samples):
+            s = initial_state
+            discount = 1.0
+            val = 0.0
+
+            for iteration_ct in range(no_iterations):
+                weights = [self.policy(grid, s, a_it) for a_it in Action]
+                a = random.choices([a_it for a_it in Action], weights)[0]
+                r = self.reward(grid, s, a)
+                val += discount * r
+
+                s = self.transition(grid, s, a)
+                discount *= gamma
+
+            return val
+
+class RewardSpecialCase(typing.NamedTuple):
+    state: State
+    action: Action
+    reward: float
+
+class TransitionSpecialCase(typing.NamedTuple):
+    state: State
+    action: Action
+    next_state: State
+
+class SpecialCaseGame(Game):
+    def __init__(
+        self,
+        reward_special_cases: list[RewardSpecialCase] = None,
+        transition_special_cases: list[TransitionSpecialCase] = None,
+    ):
+        self.reward_special_cases: list[RewardSpecialCase] = reward_special_cases or []
+        self.transition_special_cases: list[TransitionSpecialCase] = transition_special_cases or []
+
+    def reward(self, g: Grid, s: State, a: Action) -> float:
+        for special_case_it in self.reward_special_cases:
+            if s == special_case_it.state and a == special_case_it.action:
+                return special_case_it.reward
+
+        if g.off_border(s, a):
+            return -1
+        else:
+            return 0
+
+    def policy(self, g: Grid, s: State, a: Action) -> float:
+        return 1 / len(Action)
+
+    def transition(self, g: Grid, s: State, a: Action) -> float:
+        for special_case_it in self.transition_special_cases:
+            if s == special_case_it.state and a == special_case_it.action:
+                return special_case_it.next_state
+
+        if g.off_border(s, a):
+            return s
+        else:
+            return s + a
 
 if __name__ == "__main__":
-    import random
+    A: State = State(0, 1)
+    A_prime: State = State(4, 1)
+    B: State = State(0, 3)
+    B_prime: State = State(2, 3)
 
-    s = State(0, 0)
-    gamma = 0.9
-    val = 0.0
-
-    for i in range(50):
-        weights = [policy(g, s, a_it) for a_it in Action]
-        a = random.choices([a_it for a_it in Action], weights)[0]
-        r = reward(g, s, a)
-        val += gamma**i * r
-        print(s, a, r, val)
-
-        s = transition(g, s, a)
-
-    print(val)
+    grid = Grid(5, 5)
+    game = SpecialCaseGame(
+        reward_special_cases = [
+            RewardSpecialCase(A, action_it, 10)
+            for action_it in Action
+        ] + [
+            RewardSpecialCase(B, action_it, 5)
+            for action_it in Action
+        ],
+        transition_special_cases = [
+            TransitionSpecialCase(A, action_it, A_prime)
+            for action_it in Action
+        ] + [
+            TransitionSpecialCase(B, action_it, B_prime)
+            for action_it in Action
+        ],
+    )
+    res = game.play(grid, State(0, 0))
+    print(res)
 
