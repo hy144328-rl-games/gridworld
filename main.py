@@ -189,6 +189,9 @@ if __name__ == "__main__":
         ],
     )
 
-    val = game.play(grid, State(0, 0), no_iterations=100, no_samples=1000)
-    print(val)
+    res = np.empty((5, 5))
+    for i in range(5):
+        for j in range(5):
+            res[i, j] = game.play(grid, State(i, j), no_iterations=100, no_samples=1000)
+            print(i, j, res[i, j])
 
