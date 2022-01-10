@@ -80,6 +80,12 @@ class Grid:
 
         return res
 
+    def flatten(self, s: State) -> int:
+        return s.row * self.no_cols + s.col
+
+    def unflatten(self, idx: int) -> State:
+        return State(idx // self.no_cols, idx % self.no_cols)
+
 class Game(abc.ABC):
     @abc.abstractmethod
     def reward(self, g: Grid, s: State, a: Action) -> float:
@@ -189,9 +195,43 @@ if __name__ == "__main__":
         ],
     )
 
-    res = np.empty((5, 5))
-    for i in range(5):
-        for j in range(5):
-            res[i, j] = game.play(grid, State(i, j), no_iterations=100, no_samples=1000)
+    res = np.empty((grid.no_rows, grid.no_cols))
+    gamma = 0.9
+
+    for i in range(grid.no_rows):
+        for j in range(grid.no_cols):
+            res[i, j] = game.play(
+                grid,
+                State(i, j),
+                gamma=gamma,
+                no_iterations=100,
+                no_samples=1000,
+            )
             print(i, j, res[i, j])
+
+    print(res)
+
+    no_cells = grid.no_rows * grid.no_cols
+    A = np.zeros((no_cells, no_cells))
+    b = np.zeros(no_cells)
+
+    for i in range(grid.no_rows):
+        for j in range(grid.no_cols):
+            state = State(i, j)
+            idx = grid.flatten(state)
+            A[idx, idx] = -1
+
+            for a_it in Action:
+                pi = game.policy(grid, state, a_it)
+
+                r = game.reward(grid, state, a_it)
+                b[idx] -= pi * r
+
+                new_state = game.transition(grid, state, a_it)
+                new_idx = grid.flatten(new_state)
+                A[idx, new_idx] += pi * gamma
+
+    res = np.linalg.solve(A, b)
+    res = res.reshape((grid.no_rows, grid.no_cols))
+    print(res)
 
