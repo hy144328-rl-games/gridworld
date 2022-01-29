@@ -126,8 +126,7 @@ class Game(abc.ABC):
             for _ in range(no_iterations):
                 weights = [self.policy(grid, current_state, a_it) for a_it in Action]
                 a = random.choices(list(Action), weights)[0]
-                r = self.reward(grid, current_state, a)
-                val += discount * r
+                val += discount * self.reward(grid, current_state, a)
 
                 current_state = self.transition(grid, current_state, a)
                 discount *= gamma
