@@ -204,14 +204,14 @@ if __name__ == "__main__":
     )
 
     res = np.empty((grid.no_rows, grid.no_cols))
-    gamma = 0.9
+    GAMMA = 0.9
 
     for i in range(grid.no_rows):
         for j in range(grid.no_cols):
             res[i, j] = game.play(
                 grid,
                 State(i, j),
-                gamma=gamma,
+                gamma=GAMMA,
                 no_iterations=100,
                 no_samples=1000,
             )
@@ -237,7 +237,7 @@ if __name__ == "__main__":
 
                 new_state = game.transition(grid, state, a_it)
                 new_idx = grid.flatten(new_state)
-                A[idx, new_idx] += pi * gamma
+                A[idx, new_idx] += pi * GAMMA
 
     res = np.linalg.solve(A, b)
     res = res.reshape((grid.no_rows, grid.no_cols))
