@@ -8,12 +8,14 @@ import typing
 import numpy as np
 
 class Action(enum.Enum):
+    """Action in Markov decision process."""
     NORTH = enum.auto()
     SOUTH = enum.auto()
     EAST = enum.auto()
     WEST = enum.auto()
 
 class State(typing.NamedTuple):
+    """State in Markov decision process."""
     row: int
     col: int
 
@@ -33,6 +35,7 @@ class State(typing.NamedTuple):
         return State(row, col)
 
 class Grid:
+    """Gridworld lattice."""
     def __init__(self, no_rows: int=5, no_cols: int=5):
         self.no_rows: int = no_rows
         self.no_cols: int = no_cols
@@ -88,6 +91,7 @@ class Grid:
         return State(idx // self.no_cols, idx % self.no_cols)
 
 class Game(abc.ABC):
+    """Environment in Markov decision process."""
     @abc.abstractmethod
     def reward(self, g: Grid, s: State, a: Action) -> float:
         ...
@@ -131,16 +135,19 @@ class Game(abc.ABC):
         return np.mean(res)
 
 class RewardSpecialCase(typing.NamedTuple):
+    """Special case for reward."""
     state: State
     action: Action
     reward: float
 
 class TransitionSpecialCase(typing.NamedTuple):
+    """Special case for transition."""
     state: State
     action: Action
     next_state: State
 
 class SpecialCaseGame(Game):
+    """Game with special cases for rewards and transitions."""
     def __init__(
         self,
         reward_special_cases: list[RewardSpecialCase] = None,
