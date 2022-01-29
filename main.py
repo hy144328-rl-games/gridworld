@@ -2,158 +2,13 @@
 
 """Reinforcement learning of Gridworld."""
 
-import abc
-import enum
-import random
 import typing
 
 import numpy as np
 
-class Action(enum.Enum):
-    """Action in Markov decision process."""
-    NORTH = enum.auto()
-    SOUTH = enum.auto()
-    EAST = enum.auto()
-    WEST = enum.auto()
-
-class State(typing.NamedTuple):
-    """State in Markov decision process."""
-    row: int
-    col: int
-
-    def __add__(self, a: Action) -> "State":
-        row = self.row
-        col = self.col
-
-        if a == Action.NORTH:
-            row -= 1
-        elif a == Action.SOUTH:
-            row += 1
-        elif a == Action.WEST:
-            col -= 1
-        elif a == Action.EAST:
-            col += 1
-
-        return State(row, col)
-
-class Grid:
-    """Gridworld lattice."""
-    def __init__(self, no_rows: int=5, no_cols: int=5):
-        self.no_rows: int = no_rows
-        self.no_cols: int = no_cols
-
-    @staticmethod
-    def on_border_top(s: State) -> bool:
-        """Checks whether on top border."""
-        return s.row == 0
-
-    def on_border_bottom(self, s: State) -> bool:
-        """Checks whether on bottom border."""
-        return s.row == self.no_rows - 1
-
-    @staticmethod
-    def on_border_left(s: State) -> bool:
-        """Checks whether on left border."""
-        return s.col == 0
-
-    def on_border_right(self, s: State) -> bool:
-        """Checks whether on right border."""
-        return s.col == self.no_cols - 1
-
-    def on_border(self, s: State) -> bool:
-        """Checks whether on any border."""
-        res = False
-
-        res |= self.on_border_top(s)
-        res |= self.on_border_bottom(s)
-        res |= self.on_border_left(s)
-        res |= self.on_border_right(s)
-
-        return res
-
-    def off_border_top(self, s: State, a: Action) -> bool:
-        """Checks whether off top border."""
-        return self.on_border_top(s) and a == Action.NORTH
-
-    def off_border_bottom(self, s: State, a: Action) -> bool:
-        """Checks whether off bottom border."""
-        return self.on_border_bottom(s) and a == Action.SOUTH
-
-    def off_border_left(self, s: State, a: Action) -> bool:
-        """Checks whether off left border."""
-        return self.on_border_left(s) and a == Action.WEST
-
-    def off_border_right(self, s: State, a: Action) -> bool:
-        """Checks whether off right border."""
-        return self.on_border_right(s) and a == Action.EAST
-
-    def off_border(self, s: State, a: Action) -> bool:
-        """Checks whether off any border."""
-        res = False
-
-        res |= self.off_border_top(s, a)
-        res |= self.off_border_bottom(s, a)
-        res |= self.off_border_left(s, a)
-        res |= self.off_border_right(s, a)
-
-        return res
-
-    def flatten(self, s: State) -> int:
-        """Returns index in a flattened, one-dimensional array."""
-        return s.row * self.no_cols + s.col
-
-    def unflatten(self, idx: int) -> State:
-        """Returns index in a two-dimensional array."""
-        return State(idx // self.no_cols, idx % self.no_cols)
-
-class Game(abc.ABC):
-    """Environment in Markov decision process."""
-    def __init__(self):
-        self.gamma: float = 0.9
-        self.no_iterations: int = 50
-        self.no_samples: int = 1
-
-    @abc.abstractmethod
-    def reward(self, g: Grid, s: State, a: Action) -> float:
-        """Calculates reward."""
-        ...
-
-    @abc.abstractmethod
-    def policy(self, g: Grid, s: State, a: Action) -> float:
-        """Calculates probability of action."""
-        ...
-
-    @abc.abstractmethod
-    def transition(self, g: Grid, s: State, a: Action) -> float:
-        """Calculates state."""
-        ...
-
-    def play(
-        self,
-        grid: Grid,
-        initial_state: State,
-    ):
-        """Plays one or multiple games."""
-        res = []
-
-        for sample_ct in range(self.no_samples):
-            random.seed(sample_ct)
-
-            current_state = initial_state
-            discount = 1.0
-            val = 0.0
-
-            for _ in range(self.no_iterations):
-                weights = [self.policy(grid, current_state, a_it) for a_it in Action]
-                next_action = random.choices(list(Action), weights)[0]
-                val += discount * self.reward(grid, current_state, next_action)
-
-                current_state = self.transition(grid, current_state, next_action)
-                discount *= self.gamma
-
-            res.append(val)
-
-        return np.mean(res)
+from agent import Agent
+from environment import Environment, Grid
+from state import Action, State
 
 class RewardSpecialCase(typing.NamedTuple):
     """Special case for reward."""
@@ -167,82 +22,84 @@ class TransitionSpecialCase(typing.NamedTuple):
     action: Action
     next_state: State
 
-class SpecialCaseGame(Game):
-    """Game with special cases for rewards and transitions."""
+class SpecialCaseEnvironment(Environment):
+    """Environment with special cases for rewards and transitions."""
     def __init__(
         self,
+        grid: Grid,
         reward_special_cases: list[RewardSpecialCase] = None,
         transition_special_cases: list[TransitionSpecialCase] = None,
     ):
-        super().__init__()
+        super().__init__(grid)
 
         self.reward_special_cases: list[RewardSpecialCase] = reward_special_cases or []
         self.transition_special_cases: list[TransitionSpecialCase] = transition_special_cases or []
 
-    def reward(self, g: Grid, s: State, a: Action) -> float:
+    def reward(self, s: State, a: Action) -> float:
         for special_case_it in self.reward_special_cases:
             if s == special_case_it.state and a == special_case_it.action:
                 return special_case_it.reward
 
-        if g.off_border(s, a):
-            return -1
+        return super().reward(s, a)
 
-        return 0
-
-    def policy(self, g: Grid, s: State, a: Action) -> float:
-        return 1 / len(Action)
-
-    def transition(self, g: Grid, s: State, a: Action) -> float:
+    def transition(self, s: State, a: Action) -> float:
         for special_case_it in self.transition_special_cases:
             if s == special_case_it.state and a == special_case_it.action:
                 return special_case_it.next_state
 
-        if g.off_border(s, a):
-            return s
-
-        return s + a
+        return super().transition(s, a)
 
 def main_brute_force(
-    grid,
-    game,
+    env: Environment,
+    gamma: float,
 ):
     """Runs Monte-Carlo simulation."""
-    res = np.empty((grid.no_rows, grid.no_cols))
+    res = np.empty((env.grid.no_rows, env.grid.no_cols))
 
-    for i in range(grid.no_rows):
-        for j in range(grid.no_cols):
-            res[i, j] = game.play(
-                grid,
+    for i in range(env.grid.no_rows):
+        for j in range(env.grid.no_cols):
+            agent = Agent(
+                env,
                 State(i, j),
+            )
+            res[i, j] = agent.play(
+                gamma = gamma,
+                no_iterations = 100,
+                no_samples = 1000,
             )
             print(i, j, res[i, j])
 
     print(res)
 
-def main_hamilton_jacobi(grid, game):
+def main_hamilton_jacobi(
+    env: Environment,
+    gamma: float,
+):
     """Solves Hamilton-Jacobi equations."""
-    no_cells = grid.no_rows * grid.no_cols
+    no_cells = env.grid.no_rows * env.grid.no_cols
     A = np.zeros((no_cells, no_cells))
     b = np.zeros(no_cells)
 
-    for i in range(grid.no_rows):
-        for j in range(grid.no_cols):
+    for i in range(env.grid.no_rows):
+        for j in range(env.grid.no_cols):
             state = State(i, j)
-            idx = grid.flatten(state)
+            agent = Agent(env, state)
+
+            idx = env.grid.flatten(state)
             A[idx, idx] = -1
 
             for a_it in Action:
-                pi = game.policy(grid, state, a_it)
+                pi = agent.policy(a_it)
 
-                r = game.reward(grid, state, a_it)
+                r = env.reward(state, a_it)
                 b[idx] -= pi * r
 
-                new_state = game.transition(grid, state, a_it)
-                new_idx = grid.flatten(new_state)
-                A[idx, new_idx] += pi * game.gamma
+                new_state = env.transition(state, a_it)
+                new_idx = env.grid.flatten(new_state)
+                A[idx, new_idx] += pi * gamma
 
     res = np.linalg.solve(A, b)
-    res = res.reshape((grid.no_rows, grid.no_cols))
+    res = res.reshape((env.grid.no_rows, env.grid.no_cols))
     print(res)
 
 def main():
@@ -253,7 +110,8 @@ def main():
     B_prime: State = State(2, 3)
 
     grid = Grid(5, 5)
-    game = SpecialCaseGame(
+    env = SpecialCaseEnvironment(
+        grid,
         reward_special_cases = [
             RewardSpecialCase(A, action_it, 10)
             for action_it in Action
@@ -270,12 +128,8 @@ def main():
         ],
     )
 
-    game.gamma = 0.9
-    game.no_iterations = 100
-    game.no_samples = 1000
-
-    main_brute_force(grid, game)
-    main_hamilton_jacobi(grid, game)
+    main_brute_force(env, 0.9)
+    main_hamilton_jacobi(env, 0.9)
 
 if __name__ == "__main__":
     main()

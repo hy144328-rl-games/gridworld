@@ -1,3 +1,3 @@
 .PHONY: lint
 lint:
-	python3 -m pylint main.py
+	python3 -m pylint *.py
