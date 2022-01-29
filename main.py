@@ -156,8 +156,8 @@ class SpecialCaseGame(Game):
 
         if g.off_border(s, a):
             return -1
-        else:
-            return 0
+
+        return 0
 
     def policy(self, g: Grid, s: State, a: Action) -> float:
         return 1 / len(Action)
@@ -169,8 +169,8 @@ class SpecialCaseGame(Game):
 
         if g.off_border(s, a):
             return s
-        else:
-            return s + a
+
+        return s + a
 
 if __name__ == "__main__":
     A: State = State(0, 1)
