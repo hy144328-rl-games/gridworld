@@ -184,6 +184,47 @@ class SpecialCaseGame(Game):
 
         return s + a
 
+def main_brute_force(
+    grid,
+    game,
+):
+    res = np.empty((grid.no_rows, grid.no_cols))
+
+    for i in range(grid.no_rows):
+        for j in range(grid.no_cols):
+            res[i, j] = game.play(
+                grid,
+                State(i, j),
+            )
+            print(i, j, res[i, j])
+
+    print(res)
+
+def main_hamilton_jacobi(grid, game):
+    no_cells = grid.no_rows * grid.no_cols
+    A = np.zeros((no_cells, no_cells))
+    b = np.zeros(no_cells)
+
+    for i in range(grid.no_rows):
+        for j in range(grid.no_cols):
+            state = State(i, j)
+            idx = grid.flatten(state)
+            A[idx, idx] = -1
+
+            for a_it in Action:
+                pi = game.policy(grid, state, a_it)
+
+                r = game.reward(grid, state, a_it)
+                b[idx] -= pi * r
+
+                new_state = game.transition(grid, state, a_it)
+                new_idx = grid.flatten(new_state)
+                A[idx, new_idx] += pi * game.gamma
+
+    res = np.linalg.solve(A, b)
+    res = res.reshape((grid.no_rows, grid.no_cols))
+    print(res)
+
 def main():
     """Main function."""
     A: State = State(0, 1)
@@ -213,41 +254,8 @@ def main():
     game.no_iterations = 100
     game.no_samples = 1000
 
-    res = np.empty((grid.no_rows, grid.no_cols))
-
-    for i in range(grid.no_rows):
-        for j in range(grid.no_cols):
-            res[i, j] = game.play(
-                grid,
-                State(i, j),
-            )
-            print(i, j, res[i, j])
-
-    print(res)
-
-    no_cells = grid.no_rows * grid.no_cols
-    A = np.zeros((no_cells, no_cells))
-    b = np.zeros(no_cells)
-
-    for i in range(grid.no_rows):
-        for j in range(grid.no_cols):
-            state = State(i, j)
-            idx = grid.flatten(state)
-            A[idx, idx] = -1
-
-            for a_it in Action:
-                pi = game.policy(grid, state, a_it)
-
-                r = game.reward(grid, state, a_it)
-                b[idx] -= pi * r
-
-                new_state = game.transition(grid, state, a_it)
-                new_idx = grid.flatten(new_state)
-                A[idx, new_idx] += pi * game.gamma
-
-    res = np.linalg.solve(A, b)
-    res = res.reshape((grid.no_rows, grid.no_cols))
-    print(res)
+    main_brute_force(grid, game)
+    main_hamilton_jacobi(grid, game)
 
 if __name__ == "__main__":
     main()
