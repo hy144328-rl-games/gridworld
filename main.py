@@ -123,7 +123,7 @@ class Game(abc.ABC):
 
             for _ in range(no_iterations):
                 weights = [self.policy(grid, s, a_it) for a_it in Action]
-                a = random.choices([a_it for a_it in Action], weights)[0]
+                a = random.choices(list(Action), weights)[0]
                 r = self.reward(grid, s, a)
                 val += discount * r
 
