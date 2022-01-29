@@ -119,17 +119,17 @@ class Game(abc.ABC):
         for sample_ct in range(no_samples):
             random.seed(sample_ct)
 
-            s = initial_state
+            current_state = initial_state
             discount = 1.0
             val = 0.0
 
             for _ in range(no_iterations):
-                weights = [self.policy(grid, s, a_it) for a_it in Action]
+                weights = [self.policy(grid, current_state, a_it) for a_it in Action]
                 a = random.choices(list(Action), weights)[0]
-                r = self.reward(grid, s, a)
+                r = self.reward(grid, current_state, a)
                 val += discount * r
 
-                s = self.transition(grid, s, a)
+                current_state = self.transition(grid, current_state, a)
                 discount *= gamma
 
             res.append(val)
