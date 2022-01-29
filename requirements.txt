@@ -1,2 +1,3 @@
 numpy==1.22.0
-scipy
+pylint==2.12.2
+scipy==1.7.3
