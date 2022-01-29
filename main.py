@@ -125,10 +125,10 @@ class Game(abc.ABC):
 
             for _ in range(no_iterations):
                 weights = [self.policy(grid, current_state, a_it) for a_it in Action]
-                a = random.choices(list(Action), weights)[0]
-                val += discount * self.reward(grid, current_state, a)
+                next_action = random.choices(list(Action), weights)[0]
+                val += discount * self.reward(grid, current_state, next_action)
 
-                current_state = self.transition(grid, current_state, a)
+                current_state = self.transition(grid, current_state, next_action)
                 discount *= gamma
 
             res.append(val)
