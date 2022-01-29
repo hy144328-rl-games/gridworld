@@ -10,8 +10,7 @@ class Grid:
         self.no_rows: int = no_rows
         self.no_cols: int = no_cols
 
-    @staticmethod
-    def on_border_top(s: State) -> bool:
+    def on_border_top(self, s: State) -> bool:
         """Checks whether on top border."""
         return s.row == 0
 
@@ -19,8 +18,7 @@ class Grid:
         """Checks whether on bottom border."""
         return s.row == self.no_rows - 1
 
-    @staticmethod
-    def on_border_left(s: State) -> bool:
+    def on_border_left(self, s: State) -> bool:
         """Checks whether on left border."""
         return s.col == 0
 
