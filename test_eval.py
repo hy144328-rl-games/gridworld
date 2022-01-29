@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 
-"""Tests Monte-Carlo simulations and Hamilton-Jacobi equations."""
+"""Tests policy evaluation."""
 
+import abc
 import numpy as np
 import pytest
 
 from environment import Environment, Grid
-from main import main_hamilton_jacobi, special_case_environment
+from main import main_hamilton_jacobi, main_monte_carlo, special_case_environment
 
-class TestHamiltonJacobi:
-    """Tests Hamilton-Jacobi equations."""
+class PolicyEvaluationTest(abc.ABC):
+    """Tests policy evaluation."""
     @pytest.fixture
     def grid(self) -> Grid:
         """Returns grid."""
@@ -20,12 +21,12 @@ class TestHamiltonJacobi:
         """Returns environment."""
         return special_case_environment(grid)
 
-    @pytest.fixture
+    @abc.abstractmethod
     def value_function(self, env: Environment) -> np.ndarray:
-        """Value grid."""
-        return main_hamilton_jacobi(env)
+        """Computes value function."""
+        ...
 
-    def test(self, value_function: np.ndarray):
+    def test(self, value_function: np.ndarray, tol: float=5E-2):
         """Compares to reference solution."""
         assert value_function == pytest.approx(
             np.array([
@@ -35,5 +36,22 @@ class TestHamiltonJacobi:
                 [-1.0, -0.4, -0.4, -0.6, -1.2],
                 [-1.9, -1.3, -1.2, -1.4, -2.0],
             ]),
-            abs = 5E-2,
+            abs = tol,
         )
+
+class TestHamiltonJacobi(PolicyEvaluationTest):
+    """Tests Hamilton-Jacobi equations."""
+    @pytest.fixture
+    def value_function(self, env: Environment) -> np.ndarray:
+        """Solves Hamilton-Jacobi equations."""
+        return main_hamilton_jacobi(env)
+
+class TestMonteCarlo(PolicyEvaluationTest):
+    """Tests Monte-Carlo simulations."""
+    @pytest.fixture
+    def value_function(self, env: Environment) -> np.ndarray:
+        """Performs Monte-Carlo simulations."""
+        return main_monte_carlo(env)
+
+    def test(self, value_function: np.ndarray):
+        super().test(value_function, tol=2E-1)

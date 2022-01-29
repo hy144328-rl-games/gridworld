@@ -51,7 +51,7 @@ class SpecialCaseEnvironment(Environment):
 
         return super().transition(s, a)
 
-def main_brute_force(env: Environment):
+def main_monte_carlo(env: Environment):
     """Runs Monte-Carlo simulation."""
     res = np.empty((env.grid.no_rows, env.grid.no_cols))
 
@@ -128,7 +128,7 @@ def main():
     grid = Grid(5, 5)
     env = special_case_environment(grid)
 
-    print(main_brute_force(env))
+    print(main_monte_carlo(env))
     print(main_hamilton_jacobi(env))
 
 if __name__ == "__main__":
