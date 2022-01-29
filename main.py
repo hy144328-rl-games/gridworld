@@ -27,13 +27,13 @@ class SpecialCaseEnvironment(Environment):
     def __init__(
         self,
         grid: Grid,
-        reward_special_cases: list[RewardSpecialCase] = None,
-        transition_special_cases: list[TransitionSpecialCase] = None,
+        reward_special_cases: typing.List[RewardSpecialCase] = None,
+        transition_special_cases: typing.List[TransitionSpecialCase] = None,
     ):
         super().__init__(grid)
 
-        self.reward_special_cases: list[RewardSpecialCase] = reward_special_cases or []
-        self.transition_special_cases: list[TransitionSpecialCase] = transition_special_cases or []
+        self.reward_special_cases: typing.List[RewardSpecialCase] = reward_special_cases or []
+        self.transition_special_cases: typing.List[TransitionSpecialCase] = transition_special_cases or []
 
     def reward(self, s: State, a: Action) -> float:
         for special_case_it in self.reward_special_cases:
