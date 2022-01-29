@@ -108,7 +108,7 @@ class PolicyEvaluationTest(abc.ABC):
 
     @abc.abstractmethod
     def value_function(self, env: Environment) -> np.ndarray:
-        ...
+        """Computes value function."""
 
     def test(self, value_function: np.ndarray, tol: float=5E-2):
         """Compares to reference solution."""
