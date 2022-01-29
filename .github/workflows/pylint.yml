@@ -24,3 +24,7 @@ jobs:
     - name: Analysing the code with pytest
       run: |
         python -m pytest
+    - name: Analysing the code with coverage
+      run: |
+        coverage run -m pytest
+        coverage report -m --fail-under=90
