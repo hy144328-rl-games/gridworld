@@ -232,14 +232,14 @@ argument-naming-style=snake_case
 
 # Regular expression matching correct argument names. Overrides argument-
 # naming-style.
-#argument-rgx=
+argument-rgx=[a-z]+|[A-Z]
 
 # Naming style matching correct attribute names.
 attr-naming-style=snake_case
 
 # Regular expression matching correct attribute names. Overrides attr-naming-
 # style.
-#attr-rgx=
+attr-rgx=[a-z]+|[A-Z]
 
 # Bad variable names which should always be refused, separated by a comma.
 bad-names=foo,
@@ -346,7 +346,7 @@ variable-naming-style=snake_case
 
 # Regular expression matching correct variable names. Overrides variable-
 # naming-style.
-#variable-rgx=
+variable-rgx=[a-z]+|[A-Z]
 
 
 [MISCELLANEOUS]
