@@ -113,14 +113,17 @@ class Game(abc.ABC):
 
     @abc.abstractmethod
     def reward(self, g: Grid, s: State, a: Action) -> float:
+        """Calculates reward."""
         ...
 
     @abc.abstractmethod
     def policy(self, g: Grid, s: State, a: Action) -> float:
+        """Calculates probability of action."""
         ...
 
     @abc.abstractmethod
     def transition(self, g: Grid, s: State, a: Action) -> float:
+        """Calculates state."""
         ...
 
     def play(
@@ -128,6 +131,7 @@ class Game(abc.ABC):
         grid: Grid,
         initial_state: State,
     ):
+        """Plays one or multiple games."""
         res = []
 
         for sample_ct in range(self.no_samples):
@@ -200,6 +204,7 @@ def main_brute_force(
     grid,
     game,
 ):
+    """Runs Monte-Carlo simulation."""
     res = np.empty((grid.no_rows, grid.no_cols))
 
     for i in range(grid.no_rows):
@@ -213,6 +218,7 @@ def main_brute_force(
     print(res)
 
 def main_hamilton_jacobi(grid, game):
+    """Solves Hamilton-Jacobi equations."""
     no_cells = grid.no_rows * grid.no_cols
     A = np.zeros((no_cells, no_cells))
     b = np.zeros(no_cells)
