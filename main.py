@@ -2,9 +2,10 @@
 
 import abc
 import enum
-import numpy as np
 import random
 import typing
+
+import numpy as np
 
 class Action(enum.Enum):
     NORTH = enum.auto()
