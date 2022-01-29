@@ -32,8 +32,10 @@ class SpecialCaseEnvironment(Environment):
     ):
         super().__init__(grid)
 
-        self.reward_special_cases: typing.List[RewardSpecialCase] = reward_special_cases or []
-        self.transition_special_cases: typing.List[TransitionSpecialCase] = transition_special_cases or []
+        self.reward_special_cases: typing.List[RewardSpecialCase] = \
+            reward_special_cases or []
+        self.transition_special_cases: typing.List[TransitionSpecialCase] = \
+            transition_special_cases or []
 
     def reward(self, s: State, a: Action) -> float:
         for special_case_it in self.reward_special_cases:
@@ -65,7 +67,7 @@ def main_brute_force(env: Environment):
             )
             print(i, j, res[i, j])
 
-    print(res)
+    return res
 
 def main_hamilton_jacobi(env: Environment):
     """Solves Hamilton-Jacobi equations."""
@@ -92,17 +94,15 @@ def main_hamilton_jacobi(env: Environment):
                 A[idx, new_idx] += pi * env.gamma
 
     res = np.linalg.solve(A, b)
-    res = res.reshape((env.grid.no_rows, env.grid.no_cols))
-    print(res)
+    return res.reshape((env.grid.no_rows, env.grid.no_cols))
 
-def main():
-    """Main function."""
+def special_case_environment(grid: Grid):
+    """Creates SpecialCaseEnvironment."""
     A: State = State(0, 1)
     A_prime: State = State(4, 1)
     B: State = State(0, 3)
     B_prime: State = State(2, 3)
 
-    grid = Grid(5, 5)
     env = SpecialCaseEnvironment(
         grid,
         reward_special_cases = [
@@ -121,8 +121,15 @@ def main():
         ],
     )
 
-    main_brute_force(env)
-    main_hamilton_jacobi(env)
+    return env
+
+def main():
+    """Main function."""
+    grid = Grid(5, 5)
+    env = special_case_environment(grid)
+
+    print(main_brute_force(env))
+    print(main_hamilton_jacobi(env))
 
 if __name__ == "__main__":
     main()
