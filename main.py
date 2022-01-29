@@ -49,10 +49,7 @@ class SpecialCaseEnvironment(Environment):
 
         return super().transition(s, a)
 
-def main_brute_force(
-    env: Environment,
-    gamma: float,
-):
+def main_brute_force(env: Environment):
     """Runs Monte-Carlo simulation."""
     res = np.empty((env.grid.no_rows, env.grid.no_cols))
 
@@ -63,7 +60,6 @@ def main_brute_force(
                 State(i, j),
             )
             res[i, j] = agent.play(
-                gamma = gamma,
                 no_iterations = 100,
                 no_samples = 1000,
             )
@@ -71,10 +67,7 @@ def main_brute_force(
 
     print(res)
 
-def main_hamilton_jacobi(
-    env: Environment,
-    gamma: float,
-):
+def main_hamilton_jacobi(env: Environment):
     """Solves Hamilton-Jacobi equations."""
     no_cells = env.grid.no_rows * env.grid.no_cols
     A = np.zeros((no_cells, no_cells))
@@ -96,7 +89,7 @@ def main_hamilton_jacobi(
 
                 new_state = env.transition(state, a_it)
                 new_idx = env.grid.flatten(new_state)
-                A[idx, new_idx] += pi * gamma
+                A[idx, new_idx] += pi * env.gamma
 
     res = np.linalg.solve(A, b)
     res = res.reshape((env.grid.no_rows, env.grid.no_cols))
@@ -128,8 +121,8 @@ def main():
         ],
     )
 
-    main_brute_force(env, 0.9)
-    main_hamilton_jacobi(env, 0.9)
+    main_brute_force(env)
+    main_hamilton_jacobi(env)
 
 if __name__ == "__main__":
     main()

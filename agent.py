@@ -36,7 +36,6 @@ class Agent:
 
     def play(
         self,
-        gamma: float = 0.9,
         no_iterations: int = 50,
         no_samples: int = 1,
     ) -> float:
@@ -53,7 +52,7 @@ class Agent:
             for _ in range(no_iterations):
                 reward = self.move()
                 val += discount * reward
-                discount *= gamma
+                discount *= self.env.gamma
 
             res.append(val)
 
