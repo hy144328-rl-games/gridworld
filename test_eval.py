@@ -8,8 +8,8 @@ import typing
 import numpy as np
 import pytest
 
+from agent import Agent
 from environment import Environment, Grid
-from main import main_hamilton_jacobi, main_monte_carlo
 from state import Action, State
 
 class RewardSpecialCase(typing.NamedTuple):
@@ -110,14 +110,51 @@ class TestHamiltonJacobi(PolicyEvaluationTest):
     @pytest.fixture
     def value_function(self, env: Environment) -> np.ndarray:
         """Solves Hamilton-Jacobi equations."""
-        return main_hamilton_jacobi(env)
+        no_cells = env.grid.no_rows * env.grid.no_cols
+        A = np.zeros((no_cells, no_cells))
+        b = np.zeros(no_cells)
+
+        for i in range(env.grid.no_rows):
+            for j in range(env.grid.no_cols):
+                state = State(i, j)
+                agent = Agent(env, state)
+
+                idx = env.grid.flatten(state)
+                A[idx, idx] = -1
+
+                for a_it in Action:
+                    pi = agent.policy(a_it)
+
+                    r = env.reward(state, a_it)
+                    b[idx] -= pi * r
+
+                    new_state = env.transition(state, a_it)
+                    new_idx = env.grid.flatten(new_state)
+                    A[idx, new_idx] += pi * env.gamma
+
+        res = np.linalg.solve(A, b)
+        return res.reshape((env.grid.no_rows, env.grid.no_cols))
 
 class TestMonteCarlo(PolicyEvaluationTest):
     """Tests Monte-Carlo simulations."""
     @pytest.fixture
     def value_function(self, env: Environment) -> np.ndarray:
         """Performs Monte-Carlo simulations."""
-        return main_monte_carlo(env)
+        res = np.empty((env.grid.no_rows, env.grid.no_cols))
+
+        for i in range(env.grid.no_rows):
+            for j in range(env.grid.no_cols):
+                agent = Agent(
+                    env,
+                    State(i, j),
+                )
+                res[i, j] = agent.play(
+                    no_iterations = 100,
+                    no_samples = 1000,
+                )
+                print(i, j, res[i, j])
+
+        return res
 
     def test(self, value_function: np.ndarray):
         super().test(value_function, tol=2E-1)
