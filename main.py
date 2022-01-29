@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+"""Reinforcement learning of Gridworld."""
+
 import abc
 import enum
 import random
@@ -242,4 +244,3 @@ if __name__ == "__main__":
     res = np.linalg.solve(A, b)
     res = res.reshape((grid.no_rows, grid.no_cols))
     print(res)
-
