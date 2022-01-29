@@ -43,18 +43,23 @@ class Grid:
         self.no_cols: int = no_cols
 
     def on_border_top(self, s: State) -> bool:
+        """Checks whether on top border."""
         return s.row == 0
 
     def on_border_bottom(self, s: State) -> bool:
+        """Checks whether on bottom border."""
         return s.row == self.no_rows - 1
 
     def on_border_left(self, s: State) -> bool:
+        """Checks whether on left border."""
         return s.col == 0
 
     def on_border_right(self, s: State) -> bool:
+        """Checks whether on right border."""
         return s.col == self.no_cols - 1
 
     def on_border(self, s: State) -> bool:
+        """Checks whether on any border."""
         res = False
 
         res |= self.on_border_top(s)
@@ -65,18 +70,23 @@ class Grid:
         return res
 
     def off_border_top(self, s: State, a: Action) -> bool:
+        """Checks whether off top border."""
         return self.on_border_top(s) and a == Action.NORTH
 
     def off_border_bottom(self, s: State, a: Action) -> bool:
+        """Checks whether off bottom border."""
         return self.on_border_bottom(s) and a == Action.SOUTH
 
     def off_border_left(self, s: State, a: Action) -> bool:
+        """Checks whether off left border."""
         return self.on_border_left(s) and a == Action.WEST
 
     def off_border_right(self, s: State, a: Action) -> bool:
+        """Checks whether off right border."""
         return self.on_border_right(s) and a == Action.EAST
 
     def off_border(self, s: State, a: Action) -> bool:
+        """Checks whether off any border."""
         res = False
 
         res |= self.off_border_top(s, a)
@@ -87,9 +97,11 @@ class Grid:
         return res
 
     def flatten(self, s: State) -> int:
+        """Returns index in a flattened, one-dimensional array."""
         return s.row * self.no_cols + s.col
 
     def unflatten(self, idx: int) -> State:
+        """Returns index in a two-dimensional array."""
         return State(idx // self.no_cols, idx % self.no_cols)
 
 class Game(abc.ABC):
