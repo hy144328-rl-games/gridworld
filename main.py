@@ -184,7 +184,8 @@ class SpecialCaseGame(Game):
 
         return s + a
 
-if __name__ == "__main__":
+def main():
+    """Main function."""
     A: State = State(0, 1)
     A_prime: State = State(4, 1)
     B: State = State(0, 3)
@@ -247,3 +248,6 @@ if __name__ == "__main__":
     res = np.linalg.solve(A, b)
     res = res.reshape((grid.no_rows, grid.no_cols))
     print(res)
+
+if __name__ == "__main__":
+    main()
