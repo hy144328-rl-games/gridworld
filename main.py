@@ -94,6 +94,11 @@ class Grid:
 
 class Game(abc.ABC):
     """Environment in Markov decision process."""
+    def __init__(self):
+        self.gamma: float = 0.9
+        self.no_iterations: int = 50
+        self.no_samples: int = 1
+
     @abc.abstractmethod
     def reward(self, g: Grid, s: State, a: Action) -> float:
         ...
@@ -110,26 +115,23 @@ class Game(abc.ABC):
         self,
         grid: Grid,
         initial_state: State,
-        gamma: float = 0.9,
-        no_iterations: int = 50,
-        no_samples: int = 1,
     ):
         res = []
 
-        for sample_ct in range(no_samples):
+        for sample_ct in range(self.no_samples):
             random.seed(sample_ct)
 
             current_state = initial_state
             discount = 1.0
             val = 0.0
 
-            for _ in range(no_iterations):
+            for _ in range(self.no_iterations):
                 weights = [self.policy(grid, current_state, a_it) for a_it in Action]
                 next_action = random.choices(list(Action), weights)[0]
                 val += discount * self.reward(grid, current_state, next_action)
 
                 current_state = self.transition(grid, current_state, next_action)
-                discount *= gamma
+                discount *= self.gamma
 
             res.append(val)
 
@@ -154,6 +156,8 @@ class SpecialCaseGame(Game):
         reward_special_cases: list[RewardSpecialCase] = None,
         transition_special_cases: list[TransitionSpecialCase] = None,
     ):
+        super().__init__()
+
         self.reward_special_cases: list[RewardSpecialCase] = reward_special_cases or []
         self.transition_special_cases: list[TransitionSpecialCase] = transition_special_cases or []
 
@@ -204,17 +208,17 @@ if __name__ == "__main__":
         ],
     )
 
+    game.gamma = 0.9
+    game.no_iterations = 100
+    game.no_samples = 1000
+
     res = np.empty((grid.no_rows, grid.no_cols))
-    GAMMA = 0.9
 
     for i in range(grid.no_rows):
         for j in range(grid.no_cols):
             res[i, j] = game.play(
                 grid,
                 State(i, j),
-                gamma=GAMMA,
-                no_iterations=100,
-                no_samples=1000,
             )
             print(i, j, res[i, j])
 
@@ -238,7 +242,7 @@ if __name__ == "__main__":
 
                 new_state = game.transition(grid, state, a_it)
                 new_idx = grid.flatten(new_state)
-                A[idx, new_idx] += pi * GAMMA
+                A[idx, new_idx] += pi * game.gamma
 
     res = np.linalg.solve(A, b)
     res = res.reshape((grid.no_rows, grid.no_cols))
