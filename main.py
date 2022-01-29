@@ -96,33 +96,6 @@ def main_hamilton_jacobi(env: Environment):
     res = np.linalg.solve(A, b)
     return res.reshape((env.grid.no_rows, env.grid.no_cols))
 
-def special_case_environment(grid: Grid):
-    """Creates SpecialCaseEnvironment."""
-    A: State = State(0, 1)
-    A_prime: State = State(4, 1)
-    B: State = State(0, 3)
-    B_prime: State = State(2, 3)
-
-    env = SpecialCaseEnvironment(
-        grid,
-        reward_special_cases = [
-            RewardSpecialCase(A, action_it, 10)
-            for action_it in Action
-        ] + [
-            RewardSpecialCase(B, action_it, 5)
-            for action_it in Action
-        ],
-        transition_special_cases = [
-            TransitionSpecialCase(A, action_it, A_prime)
-            for action_it in Action
-        ] + [
-            TransitionSpecialCase(B, action_it, B_prime)
-            for action_it in Action
-        ],
-    )
-
-    return env
-
 def main():
     """Main function."""
     grid = Grid(5, 5)
