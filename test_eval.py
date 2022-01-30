@@ -140,18 +140,18 @@ class TestHamiltonJacobi(PolicyEvaluationTest):
             for j in range(grid.no_cols):
                 state = State(i, j)
                 agent = Agent(env, state)
+                pi = agent.policy(state)
 
                 idx = grid.flatten(state)
                 A[idx, idx] = -1
 
                 for a_it in Action:
-                    pi = agent.policy(state, a_it)
                     r = env.reward(state, a_it)
-                    b[idx] -= pi * r
+                    b[idx] -= pi[a_it] * r
 
                     new_state = env.transition(state, a_it)
                     new_idx = grid.flatten(new_state)
-                    A[idx, new_idx] += pi * env.gamma
+                    A[idx, new_idx] += pi[a_it] * env.gamma
 
         res = np.linalg.solve(A, b)
         return res.reshape((grid.no_rows, grid.no_cols))

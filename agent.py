@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-"""Agent in Markov decision process."""
+"""Agents in Markov decision process."""
 
 import random
 
@@ -20,8 +20,11 @@ class Agent:
 
     def pick(self) -> Action:
         """Picks action according to policy."""
-        weights = [self.policy(self.current_state, a_it) for a_it in Action]
-        next_action = random.choices(list(Action), weights)[0]
+        pi = self.policy(self.current_state)
+        next_action = random.choices(
+            list(pi.keys()),
+            list(pi.values()),
+        )[0]
         return next_action
 
     def move(self) -> float:

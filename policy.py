@@ -9,12 +9,8 @@ import numpy as np
 from environment import Environment
 from state import Action, State
 
-def greedy_algorithm(
-    values: typing.Dict[Action, float],
-) -> float:
-    no_max = len([e for e in values if values[e] == max(values.values())])
-
 class Policy:
+    """Policies in Markov decision process."""
     def __init__(
         self,
         env: Environment,
@@ -26,10 +22,13 @@ class Policy:
         )
         self.heuristic: typing.Callable[
             typing.Dict[Action, float],
-            float,
+            typing.Dict[Action, float],
         ] = lambda x: {action_it: 0.25 for action_it in Action}
 
-    def __call__(self, s: State, a: Action) -> float:
+    def __call__(
+        self,
+        s: State,
+    ) -> typing.Dict[Action, float]:
         # pylint: disable=unused-argument,no-self-use
         """Calculates probability of action."""
         action_values = {}
@@ -38,4 +37,4 @@ class Policy:
             action_values[action_it] = self.value_function[new_state]
 
         action_probabilities = self.heuristic(action_values)
-        return action_probabilities[a]
+        return action_probabilities
