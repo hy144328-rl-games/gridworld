@@ -54,6 +54,7 @@ class SpecialCaseEnvironment(Environment):
         return super().transition(s, a)
 
 class PolicyEvaluationTest(abc.ABC):
+    # pylint: disable=no-self-use
     """Tests policy evaluation."""
     @pytest.fixture
     def grid(self) -> Grid:
@@ -124,6 +125,7 @@ class PolicyEvaluationTest(abc.ABC):
         )
 
 class TestHamiltonJacobi(PolicyEvaluationTest):
+    # pylint: disable=no-self-use
     """Tests Hamilton-Jacobi equations."""
     @pytest.fixture
     def value_function(self, env: Environment) -> np.ndarray:
@@ -155,6 +157,7 @@ class TestHamiltonJacobi(PolicyEvaluationTest):
         return res.reshape((grid.no_rows, grid.no_cols))
 
 class TestMonteCarlo(PolicyEvaluationTest):
+    # pylint: disable=no-self-use
     """Tests Monte-Carlo simulations."""
     @pytest.fixture
     def value_function(self, env: Environment) -> np.ndarray:

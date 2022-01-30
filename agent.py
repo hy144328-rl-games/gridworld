@@ -17,6 +17,7 @@ class Agent:
         self.current_state: State = self.initial_state
 
     def policy(self, a: Action) -> float:
+        # pylint: disable=unused-argument,no-self-use
         """Calculates probability of action."""
         return 1 / len(Action)
 

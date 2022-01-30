@@ -11,6 +11,7 @@ class Grid:
         self.no_cols: int = no_cols
 
     def on_border_top(self, s: State) -> bool:
+        # pylint: disable=no-self-use
         """Checks whether on top border."""
         return s.row == 0
 
@@ -19,6 +20,7 @@ class Grid:
         return s.row == self.no_rows - 1
 
     def on_border_left(self, s: State) -> bool:
+        # pylint: disable=no-self-use
         """Checks whether on left border."""
         return s.col == 0
 
