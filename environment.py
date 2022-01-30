@@ -28,7 +28,7 @@ class Grid:
         """Checks whether on right border."""
         return s.col == self.no_cols - 1
 
-    def on_border(self, s: State) -> bool:
+    def on_border(self, s: State) -> bool: # pragma: no cover
         """Checks whether on any border."""
         res = False
 
@@ -70,7 +70,7 @@ class Grid:
         """Returns index in a flattened, one-dimensional array."""
         return s.row * self.no_cols + s.col
 
-    def unflatten(self, idx: int) -> State:
+    def unflatten(self, idx: int) -> State: # pragma: no cover
         """Returns index in a two-dimensional array."""
         return State(idx // self.no_cols, idx % self.no_cols)
 
