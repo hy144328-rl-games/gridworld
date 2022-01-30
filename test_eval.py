@@ -145,7 +145,7 @@ class TestHamiltonJacobi(PolicyEvaluationTest):
                 A[idx, idx] = -1
 
                 for a_it in Action:
-                    pi = agent.policy(a_it)
+                    pi = agent.policy(state, a_it)
                     r = env.reward(state, a_it)
                     b[idx] -= pi * r
 

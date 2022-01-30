@@ -7,23 +7,20 @@ import random
 import numpy as np
 
 from environment import Environment
+from policy import Policy
 from state import Action, State
 
 class Agent:
     """Agent in Markov decision process."""
     def __init__(self, env: Environment, s: State):
         self.env: Environment = env
+        self.policy: Policy = Policy(self.env)
         self.initial_state: State = s
         self.current_state: State = self.initial_state
 
-    def policy(self, a: Action) -> float:
-        # pylint: disable=unused-argument,no-self-use
-        """Calculates probability of action."""
-        return 1 / len(Action)
-
     def pick(self) -> Action:
         """Picks action according to policy."""
-        weights = [self.policy(a_it) for a_it in Action]
+        weights = [self.policy(self.current_state, a_it) for a_it in Action]
         next_action = random.choices(list(Action), weights)[0]
         return next_action
 
