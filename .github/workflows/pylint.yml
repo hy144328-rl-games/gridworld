@@ -20,11 +20,10 @@ jobs:
         python -m pip install -r requirements.txt
     - name: Analysing the code with pylint
       run: |
-        pylint --fail-under=9.0 $(git ls-files '*.py')
+        make lint
     - name: Analysing the code with pytest
       run: |
-        python -m pytest
+        make test
     - name: Analysing the code with coverage
       run: |
-        coverage run -m pytest
-        coverage report -m --fail-under=90
+        make coverage
