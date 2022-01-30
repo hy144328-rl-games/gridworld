@@ -1,6 +1,6 @@
 .PHONY: lint
 lint:
-	python3 -m $(git ls-files '*.py')
+	python3 -m pylint $$(git ls-files '*.py')
 
 .PHONY: test
 test:
