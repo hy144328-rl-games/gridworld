@@ -10,3 +10,7 @@ test:
 coverage:
 	coverage run -m pytest
 	coverage report
+
+.PHONY: pre-commit
+pre-commit:
+	pre-commit run --all-files
